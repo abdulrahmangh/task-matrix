@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Task Matrix</title>
+<meta name="theme-color" content="#16181d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='13' height='13' rx='3' fill='%23d93f3f'/%3E%3Crect x='17' y='2' width='13' height='13' rx='3' fill='%232f6fde'/%3E%3Crect x='2' y='17' width='13' height='13' rx='3' fill='%23d89414'/%3E%3Crect x='17' y='17' width='13' height='13' rx='3' fill='%238a919c'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f3f4f6;--surface:#fff;--surface2:#f8f9fb;--text:#16181d;--muted:#6b7280;--border:#e2e5ea;
+  --accent:#2f6fde;--danger:#d93f3f;--ok:#1f9d55;
+  --q-do:#d93f3f;--q-do-bg:#fdeeee;--q-schedule:#2f6fde;--q-schedule-bg:#ecf2fd;
+  --q-delegate:#d89414;--q-delegate-bg:#fdf5e4;--q-later:#8a919c;--q-later-bg:#eff0f3;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 6px rgba(16,24,40,.05);
+  --radius:12px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e1013;--surface:#171a1f;--surface2:#1d2127;--text:#e8eaee;--muted:#9399a5;--border:#2a2f37;
+  --q-do-bg:#2b1719;--q-schedule-bg:#15203a;--q-delegate-bg:#2b2213;--q-later-bg:#1e2228;--shadow:none;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent}
+.hidden{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 12px}
+label>input,label>select,label>textarea{margin-top:4px;color:var(--text);font-size:15px}
+.btn{border:1px solid var(--border);background:var(--surface);padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--danger)}
+.btn:disabled{opacity:.6}
+.link{background:none;border:0;color:var(--accent);cursor:pointer;padding:6px 0}
+.muted{color:var(--muted)}
+.center{min-height:100vh;display:grid;place-items:center;padding:16px}
+.panel{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+.panel h1{margin:0 0 6px;font-size:22px}
+.panel .btn{width:100%;margin-top:4px}
+.msg{min-height:1.2em;font-size:13px;color:var(--danger);margin:10px 0 0}
+
+/* App shell */
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:max(12px,env(safe-area-inset-top)) 16px 8px;display:flex;align-items:center;gap:10px}
+.brand{font-weight:700;font-size:18px;flex:1;display:flex;align-items:center;gap:8px}
+.logo{width:20px;height:20px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.logo i{border-radius:2px}
+.icon{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:18px}
+.filters{display:flex;gap:8px;padding:0 16px 8px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--text);color:var(--bg)}
+.filters select{width:auto;flex:1;min-width:120px;padding:8px 10px;font-size:14px;background:var(--surface)}
+.tog{display:flex;align-items:center;gap:6px;margin:0;font-size:14px;color:var(--text);white-space:nowrap}
+.tog input{width:auto;margin:0}
+.searchwrap{padding:0 16px 12px}
+.searchwrap input{background:var(--surface)}
+
+.grid{display:grid;gap:12px;padding:0 16px 110px;grid-template-columns:1fr}
+@media (min-width:820px){.grid{grid-template-columns:1fr 1fr;max-width:1300px;margin:0 auto}}
+.quad{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.qhead{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 14px;border-top:4px solid var(--qc)}
+.qhead .t{flex:1;min-width:0}
+.qhead h2{margin:0;font-size:16px}
+.qhead small{color:var(--muted);font-size:12px}
+.count{min-width:26px;height:22px;padding:0 7px;border-radius:11px;background:var(--qbg);color:var(--qc);font-weight:700;font-size:13px;display:grid;place-items:center}
+.qadd{width:32px;height:32px;border-radius:8px;border:1px dashed var(--border);background:none;cursor:pointer;color:var(--muted);font-size:18px}
+.list{padding:0 10px 10px;min-height:70px;display:flex;flex-direction:column;gap:8px;flex:1}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:14px 0;border:1px dashed var(--border);border-radius:10px}
+.q-do{--qc:var(--q-do);--qbg:var(--q-do-bg)}
+.q-schedule{--qc:var(--q-schedule);--qbg:var(--q-schedule-bg)}
+.q-delegate{--qc:var(--q-delegate);--qbg:var(--q-delegate-bg)}
+.q-later{--qc:var(--q-later);--qbg:var(--q-later-bg)}
+
+.card{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--qc);border-radius:10px;padding:10px;cursor:pointer;user-select:none}
+.card:hover{border-color:var(--qc)}
+.chk{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--qc);background:none;cursor:pointer;color:transparent;font-size:13px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+.card.s-done .chk{background:var(--qc);color:#fff}
+.card.s-done .subj{text-decoration:line-through;color:var(--muted)}
+.cbody{flex:1;min-width:0}
+.subj{font-weight:600;word-wrap:break-word}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-size:12px;color:var(--muted)}
+.tag{padding:2px 8px;border-radius:6px;background:var(--qbg);color:var(--qc);font-weight:600}
+.pill{padding:2px 8px;border-radius:6px;border:1px solid var(--border)}
+.overdue{color:var(--danger);font-weight:700}
+.av{width:22px;height:22px;border-radius:50%;background:var(--text);color:var(--bg);font-size:10px;font-weight:700;display:grid;place-items:center}
+.sortable-ghost{opacity:.35}
+.sortable-chosen{box-shadow:0 8px 24px rgba(0,0,0,.18)}
+
+.fab{position:fixed;right:20px;bottom:max(20px,env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:32px;line-height:1;box-shadow:0 6px 20px rgba(47,111,222,.45);cursor:pointer;z-index:6}
+
+/* Dialogs */
+dialog{border:0;padding:0;border-radius:16px;background:var(--surface);color:var(--text);width:min(560px,calc(100vw - 20px));max-height:calc(100vh - 20px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(10,12,16,.5)}
+dialog form{padding:20px}
+dialog h2{margin:0 0 14px;font-size:19px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.row2{grid-template-columns:1fr}}
+.pri{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.chip{display:flex;align-items:center;gap:6px;margin:0;padding:8px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;color:var(--text);font-size:14px;font-weight:600}
+.chip input{width:auto;margin:0}
+.chip:has(input:checked){border-color:var(--accent);background:var(--q-schedule-bg)}
+.qprev{margin-left:auto;padding:6px 10px;border-radius:8px;background:var(--qbg);color:var(--qc);font-weight:700;font-size:13px}
+fieldset{border:1px solid var(--border);border-radius:12px;padding:12px 12px 0;margin:2px 0 14px}
+legend{padding:0 6px;font-size:13px;font-weight:600}
+.hint{font-size:12px;color:var(--muted);margin:-6px 0 12px}
+.actions{display:flex;gap:8px;align-items:center;margin-top:6px}
+.actions .sp{flex:1}
+.steps{font-size:13px;color:var(--muted);margin:0 0 12px;padding-left:18px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+hr{border:0;border-top:1px solid var(--border);margin:16px 0}
+
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+
+<div id="boot" class="center muted">Loading…</div>
+
+<!-- One-time connection screen -->
+<section id="configScreen" class="center hidden">
+  <form class="panel" id="configForm">
+    <h1>Connect to Supabase</h1>
+    <p class="muted">One-time setup. Find both in Supabase → Project Settings → API Keys.</p>
+    <label>Project URL<input name="url" required placeholder="https://xxxx.supabase.co" autocomplete="off"></label>
+    <label>Anon / publishable key<input name="key" required autocomplete="off"></label>
+    <button class="btn primary">Save &amp; continue</button>
+  </form>
+</section>
+
+<!-- Sign in -->
+<section id="authScreen" class="center hidden">
+  <form class="panel" id="authForm">
+    <h1>Task Matrix</h1>
+    <p class="muted">Sign in with the account your admin created.</p>
+    <label>Email<input type="email" name="email" required autocomplete="email"></label>
+    <label>Password<input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="btn primary" id="signInBtn">Sign in</button>
+    <p class="msg" id="authMsg"></p>
+    <button type="button" class="link" id="forgotBtn">Forgot password?</button>
+  </form>
+</section>
+
+<!-- Main app -->
+<section id="app" class="hidden">
+  <header class="top">
+    <div class="brand">
+      <span class="logo"><i style="background:var(--q-do)"></i><i style="background:var(--q-schedule)"></i><i style="background:var(--q-delegate)"></i><i style="background:var(--q-later)"></i></span>
+      Task Matrix
+    </div>
+    <button class="icon" id="settingsBtn" aria-label="Settings">⚙︎</button>
+  </header>
+  <div class="filters">
+    <div class="seg" id="whoSeg">
+      <button data-who="mine" class="on">My tasks</button>
+      <button data-who="byme">Assigned by me</button>
+      <button data-who="all">Team</button>
+    </div>
+    <select id="catFilter" aria-label="Category"></select>
+    <label class="tog"><input type="checkbox" id="showDone"> Show done</label>
+  </div>
+  <div class="searchwrap"><input id="search" type="search" placeholder="Search subject or remarks…"></div>
+  <main class="grid" id="grid"></main>
+  <button class="fab" id="addBtn" aria-label="Add task">+</button>
+</section>
+
+<datalist id="catList"></datalist>
+
+<!-- Task editor -->
+<dialog id="taskDlg">
+  <form id="taskForm" novalidate>
+    <h2 id="taskTitle">New task</h2>
+    <label>Subject<input name="subject" required maxlength="300" placeholder="What needs to be done?"></label>
+    <label>Remarks<textarea name="remarks" rows="3" placeholder="Details, references, notes…"></textarea></label>
+
+    <div class="pri">
+      <label class="chip"><input type="checkbox" name="important"> Important</label>
+      <label class="chip"><input type="checkbox" name="urgent"> Urgent</label>
+      <span class="qprev" id="qPrev"></span>
+    </div>
+
+    <div class="row2">
+      <label>Category<input name="category" list="catList" placeholder="e.g. Due diligence"></label>
+      <label>Status
+        <select name="status">
+          <option value="open">Open</option>
+          <option value="in_progress">In progress</option>
+          <option value="done">Done</option>
+        </select>
+      </label>
+    </div>
+    <div class="row2">
+      <label>Due date<input type="datetime-local" name="due_date"></label>
+      <label>Assign to<select name="assigned_to"></select></label>
+    </div>
+
+    <fieldset>
+      <legend>🔔 Telegram reminder</legend>
+      <div class="row2">
+        <label>First reminder<input type="datetime-local" name="remind_at"></label>
+        <label>Repeat
+          <select name="remind_repeat">
+            <option value="daily">Every day</option>
+            <option value="workdays">Workdays (Sun–Thu)</option>
+            <option value="weekly">Every week</option>
+            <option value="none">Once only</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint">Goes to the assignee. Repeats until the task is marked done. Leave the time empty for no reminder.</p>
+    </fieldset>
+
+    <p class="msg" id="taskMsg"></p>
+    <div class="actions">
+      <button type="button" class="btn danger" id="delBtn">Delete</button>
+      <span class="sp"></span>
+      <button type="button" class="btn" id="cancelBtn">Cancel</button>
+      <button type="submit" class="btn primary" id="saveBtn">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Settings -->
+<dialog id="settingsDlg">
+  <form id="settingsForm">
+    <h2>Settings</h2>
+    <label>Your name<input name="full_name" maxlength="80"></label>
+
+    <label>Telegram chat ID<input name="telegram_chat_id" inputmode="numeric" placeholder="e.g. 123456789"></label>
+    <ol class="steps">
+      <li>Open the team's Telegram bot and press <b>Start</b>.</li>
+      <li>Message <b>@userinfobot</b> on Telegram — it replies with your numeric ID.</li>
+      <li>Paste it above, save, then tap “Send test”.</li>
+    </ol>
+
+    <div class="row2">
+      <label>Daily summary time<input type="time" name="summary_time"></label>
+      <label class="tog" style="margin-top:22px"><input type="checkbox" name="summary_workdays_only"> Workdays only</label>
+    </div>
+    <p class="hint">Riyadh time. Clear the time to turn the daily summary off.</p>
+
+    <div class="btnrow">
+      <button type="submit" class="btn primary">Save</button>
+      <button type="button" class="btn" id="testBtn">Send test</button>
+      <button type="button" class="btn" id="summaryBtn">Send summary now</button>
+    </div>
+
+    <hr>
+    <label>New password<input type="password" name="new_password" autocomplete="new-password" placeholder="Leave empty to keep current"></label>
+    <div class="btnrow">
+      <button type="button" class="btn" id="pwBtn">Change password</button>
+      <button type="button" class="btn danger" id="signOutBtn">Sign out</button>
+      <button type="button" class="btn" id="closeSettings">Close</button>
+    </div>
+    <button type="button" class="link" id="resetCfg">Change Supabase connection</button>
+  </form>
+</dialog>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script>
+/* ============================================================
+   OPTIONAL: hard-code your project here so teammates skip the
+   connection screen. Leave empty to enter them in the browser.
+   ============================================================ */
+const SUPABASE_URL = "https://arounjfjzyrgnvtmxgmc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_P53Aaj-AQlWnW3gypGlLxg_Qyx35M6V";
+
+const QUADS = {
+  do:       { name: "Do now",   sub: "Important · Urgent" },
+  schedule: { name: "Schedule", sub: "Important · Not urgent" },
+  delegate: { name: "Delegate", sub: "Not important · Urgent" },
+  later:    { name: "Later",    sub: "Not important · Not urgent" },
+};
+const DEFAULT_CATS = ["Due diligence", "Assignment", "Overview", "Follow-up"];
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+
+let sb, me = null, profiles = [], tasks = [], editing = null;
+const filt = Object.assign({ who: "mine", cat: "", showDone: false, q: "" }, store.get("tm_filter") || {});
+filt.q = "";
+
+function show(id) {
+  ["boot", "configScreen", "authScreen", "app"].forEach(x => $("#" + x).classList.toggle("hidden", x !== id));
+}
+let toastT;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2800);
+}
+function toLocalInput(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+const fromLocalInput = v => (v ? new Date(v).toISOString() : null);
+function fmtDate(iso) {
+  const d = new Date(iso), now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const tmr = new Date(now); tmr.setDate(now.getDate() + 1);
+  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (sameDay) return "Today " + time;
+  if (d.toDateString() === tmr.toDateString()) return "Tomorrow " + time;
+  return d.toLocaleDateString([], { day: "numeric", month: "short" }) + " " + time;
+}
+const quadOf = (imp, urg) => imp && urg ? "do" : imp ? "schedule" : urg ? "delegate" : "later";
+const owner = t => t.assigned_to || t.created_by;
+const pName = id => { const p = profiles.find(x => x.id === id); return p ? (p.full_name || p.email || "?") : "?"; };
+const initials = id => pName(id).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
+
+/* ---------- Boot ---------- */
+function getCfg() {
+  if (SUPABASE_URL && SUPABASE_KEY) return { url: SUPABASE_URL, key: SUPABASE_KEY };
+  return store.get("tm_cfg");
+}
+async function boot() {
+  const cfg = getCfg();
+  if (!cfg) { show("configScreen"); return; }
+  sb = supabase.createClient(cfg.url, cfg.key);
+  sb.auth.onAuthStateChange(async (ev, session) => {
+    if (ev === "PASSWORD_RECOVERY") {
+      const p = prompt("Enter a new password (min 6 characters):");
+      if (p) { const { error } = await sb.auth.updateUser({ password: p }); toast(error ? error.message : "Password updated"); }
+    }
+    if (ev === "SIGNED_OUT") { me = null; show("authScreen"); }
+  });
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await enterApp(session.user); else show("authScreen");
+}
+
+$("#configForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  let url = f.get("url").trim().replace(/\/+$/, "");
+  if (!/^https:\/\//.test(url)) url = "https://" + url;
+  store.set("tm_cfg", { url, key: f.get("key").trim() });
+  boot();
+});
+
+$("#authForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = new FormData(e.target), btn = $("#signInBtn");
+  btn.disabled = true; $("#authMsg").textContent = "";
+  const { data, error } = await sb.auth.signInWithPassword({ email: f.get("email").trim(), password: f.get("password") });
+  btn.disabled = false;
+  if (error) { $("#authMsg").textContent = error.message; return; }
+  await enterApp(data.user);
+});
+$("#forgotBtn").addEventListener("click", async () => {
+  const email = $("#authForm").email.value.trim();
+  if (!email) { $("#authMsg").textContent = "Type your email first."; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("#")[0] });
+  $("#authMsg").textContent = error ? error.message : "Check your email for a reset link.";
+});
+
+/* ---------- Data ---------- */
+async function enterApp(user) {
+  show("boot");
+  await loadProfiles();
+  me = profiles.find(p => p.id === user.id) || { id: user.id, email: user.email };
+  buildGrid();
+  await loadTasks();
+  show("app");
+  sb.channel("tasks-live")
+    .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => debouncedLoad())
+    .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadProfiles().then(render))
+    .subscribe();
+  if (!me.telegram_chat_id) setTimeout(() => toast("Tip: add your Telegram chat ID in ⚙︎ Settings"), 800);
+}
+async function loadProfiles() {
+  const { data, error } = await sb.from("profiles").select("*").order("full_name");
+  if (!error) profiles = data;
+  if (me) me = profiles.find(p => p.id === me.id) || me;
+}
+async function loadTasks() {
+  const { data, error } = await sb.from("tasks").select("*").order("created_at", { ascending: false }).limit(2000);
+  if (error) { toast(error.message); return; }
+  tasks = data; render();
+}
+let loadT;
+const debouncedLoad = () => { clearTimeout(loadT); loadT = setTimeout(loadTasks, 300); };
+
+/* ---------- Render ---------- */
+function buildGrid() {
+  $("#grid").innerHTML = Object.entries(QUADS).map(([k, q]) => `
+    <section class="quad q-${k}">
+      <div class="qhead">
+        <div class="t"><h2>${q.name}</h2><small>${q.sub}</small></div>
+        <span class="count" id="cnt-${k}">0</span>
+        <button class="qadd" data-q="${k}" aria-label="Add to ${q.name}">+</button>
+      </div>
+      <div class="list" data-q="${k}"></div>
+    </section>`).join("");
+  document.querySelectorAll(".list").forEach(el => Sortable.create(el, {
+    group: "tasks", animation: 150, delay: 180, delayOnTouchOnly: true,
+    filter: ".chk,.empty", preventOnFilter: false, draggable: ".card",
+    onEnd: onDrop,
+  }));
+}
+
+function visible() {
+  const q = filt.q.toLowerCase();
+  return tasks.filter(t => {
+    if (!filt.showDone && t.status === "done") return false;
+    if (filt.who === "mine" && owner(t) !== me.id) return false;
+    if (filt.who === "byme" && !(t.created_by === me.id && t.assigned_to && t.assigned_to !== me.id)) return false;
+    if (filt.cat && (t.category || "") !== filt.cat) return false;
+    if (q && !((t.subject || "") + " " + (t.remarks || "")).toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+function sortTasks(a, b) {
+  const sd = (a.status === "done") - (b.status === "done");
+  if (sd) return sd;
+  const da = a.due_date ? Date.parse(a.due_date) : Infinity, db_ = b.due_date ? Date.parse(b.due_date) : Infinity;
+  if (da !== db_) return da - db_;
+  return Date.parse(b.created_at) - Date.parse(a.created_at);
+}
+function card(t) {
+  const now = Date.now();
+  const due = t.due_date ? Date.parse(t.due_date) : null;
+  const overdue = due && t.status !== "done" && due < now;
+  const m = [];
+  if (t.category) m.push(`<span class="tag">${esc(t.category)}</span>`);
+  if (due) m.push(`<span class="${overdue ? "overdue" : ""}">${overdue ? "⚠️ " : "📅 "}${esc(fmtDate(t.due_date))}</span>`);
+  if (t.status === "in_progress") m.push(`<span class="pill">⏳ In progress</span>`);
+  if (t.remind_at && t.status !== "done") m.push(`<span title="Next reminder ${esc(fmtDate(t.remind_at))}">🔔</span>`);
+  if (owner(t) !== me.id || filt.who !== "mine") m.push(`<span class="av" title="${esc(pName(owner(t)))}">${esc(initials(owner(t)))}</span>`);
+  return `<div class="card s-${t.status}" data-id="${t.id}">
+    <button class="chk" aria-label="Mark done">✓</button>
+    <div class="cbody"><div class="subj">${esc(t.subject)}</div>${m.length ? `<div class="meta">${m.join("")}</div>` : ""}</div>
+  </div>`;
+}
+function render() {
+  if (!me) return;
+  const list = visible().sort(sortTasks);
+  for (const k of Object.keys(QUADS)) {
+    const items = list.filter(t => t.quadrant === k);
+    const el = $(`.list[data-q="${k}"]`);
+    el.innerHTML = items.length ? items.map(card).join("") : `<div class="empty">Nothing here</div>`;
+    $("#cnt-" + k).textContent = items.filter(t => t.status !== "done").length;
+  }
+  // categories
+  const cats = [...new Set([...DEFAULT_CATS, ...tasks.map(t => t.category).filter(Boolean)])].sort();
+  $("#catList").innerHTML = cats.map(c => `<option value="${esc(c)}">`).join("");
+  $("#catFilter").innerHTML = `<option value="">All categories</option>` +
+    cats.map(c => `<option ${c === filt.cat ? "selected" : ""}>${esc(c)}</option>`).join("");
+  document.querySelectorAll("#whoSeg button").forEach(b => b.classList.toggle("on", b.dataset.who === filt.who));
+  $("#showDone").checked = filt.showDone;
+}
+
+/* ---------- Interactions ---------- */
+$("#grid").addEventListener("click", async e => {
+  const add = e.target.closest(".qadd");
+  if (add) return openTask(null, add.dataset.q);
+  const c = e.target.closest(".card");
+  if (!c) return;
+  const t = tasks.find(x => x.id === c.dataset.id);
+  if (!t) return;
+  if (e.target.closest(".chk")) {
+    const status = t.status === "done" ? "open" : "done";
+    const prev = t.status; t.status = status; render();
+    const { error } = await sb.from("tasks").update({ status }).eq("id", t.id);
+    if (error) { t.status = prev; render(); toast(error.message); }
+    else if (status === "done") toast("Done ✓");
+    return;
+  }
+  openTask(t);
+});
+
+async function onDrop(evt) {
+  const to = evt.to.dataset.q, from = evt.from.dataset.q;
+  if (to === from) return;
+  const t = tasks.find(x => x.id === evt.item.dataset.id);
+  if (!t) return;
+  t.quadrant = to; render();
+  const { error } = await sb.from("tasks").update({ quadrant: to }).eq("id", t.id);
+  if (error) { t.quadrant = from; render(); toast("Only the creator or assignee can move this task"); }
+  else toast("Moved to " + QUADS[to].name);
+}
+
+document.querySelectorAll("#whoSeg button").forEach(b => b.addEventListener("click", () => {
+  filt.who = b.dataset.who; store.set("tm_filter", filt); render();
+}));
+$("#catFilter").addEventListener("change", e => { filt.cat = e.target.value; store.set("tm_filter", filt); render(); });
+$("#showDone").addEventListener("change", e => { filt.showDone = e.target.checked; store.set("tm_filter", filt); render(); });
+$("#search").addEventListener("input", e => { filt.q = e.target.value; render(); });
+$("#addBtn").addEventListener("click", () => openTask(null, "do"));
+
+/* ---------- Task dialog ---------- */
+const tf = $("#taskForm");
+function updateQPrev() {
+  const k = quadOf(tf.important.checked, tf.urgent.checked);
+  const el = $("#qPrev"); el.className = "qprev q-" + k; el.textContent = "→ " + QUADS[k].name;
+}
+tf.important.addEventListener("change", updateQPrev);
+tf.urgent.addEventListener("change", updateQPrev);
+
+function openTask(t, quad) {
+  editing = t;
+  $("#taskTitle").textContent = t ? "Edit task" : "New task";
+  $("#taskMsg").textContent = "";
+  tf.assigned_to.innerHTML = profiles.map(p =>
+    `<option value="${p.id}">${esc(p.full_name || p.email)}${p.id === me.id ? " (me)" : ""}</option>`).join("");
+  const q = t ? t.quadrant : (quad || "do");
+  tf.subject.value = t?.subject || "";
+  tf.remarks.value = t?.remarks || "";
+  tf.important.checked = q === "do" || q === "schedule";
+  tf.urgent.checked = q === "do" || q === "delegate";
+  tf.category.value = t?.category || (filt.cat || "");
+  tf.status.value = t?.status || "open";
+  tf.due_date.value = toLocalInput(t?.due_date);
+  tf.assigned_to.value = t ? owner(t) : me.id;
+  tf.remind_at.value = toLocalInput(t?.remind_at);
+  tf.remind_repeat.value = t?.remind_repeat || "daily";
+  $("#delBtn").classList.toggle("hidden", !t || t.created_by !== me.id);
+  updateQPrev();
+  $("#taskDlg").showModal();
+  if (!t) setTimeout(() => tf.subject.focus(), 50);
+}
+$("#cancelBtn").addEventListener("click", () => $("#taskDlg").close());
+
+tf.addEventListener("submit", async e => {
+  e.preventDefault();
+  const subject = tf.subject.value.trim();
+  if (!subject) { $("#taskMsg").textContent = "Subject is required."; tf.subject.focus(); return; }
+  const remindAt = fromLocalInput(tf.remind_at.value);
+  if (remindAt && tf.remind_repeat.value === "none" && Date.parse(remindAt) < Date.now()) {
+    $("#taskMsg").textContent = "The reminder time is in the past."; return;
+  }
+  const row = {
+    subject,
+    remarks: tf.remarks.value.trim() || null,
+    quadrant: quadOf(tf.important.checked, tf.urgent.checked),
+    category: tf.category.value.trim() || null,
+    status: tf.status.value,
+    due_date: fromLocalInput(tf.due_date.value),
+    assigned_to: tf.assigned_to.value || me.id,
+    remind_at: remindAt,
+    remind_repeat: tf.remind_repeat.value,
+  };
+  $("#saveBtn").disabled = true;
+  const res = editing
+    ? await sb.from("tasks").update(row).eq("id", editing.id).select().single()
+    : await sb.from("tasks").insert({ ...row, created_by: me.id }).select().single();
+  $("#saveBtn").disabled = false;
+  if (res.error) { $("#taskMsg").textContent = res.error.message; return; }
+  const i = tasks.findIndex(x => x.id === res.data.id);
+  if (i >= 0) tasks[i] = res.data; else tasks.unshift(res.data);
+  render();
+  $("#taskDlg").close();
+  toast(editing ? "Saved" : "Task added to " + QUADS[row.quadrant].name);
+});
+
+$("#delBtn").addEventListener("click", async () => {
+  if (!editing || !confirm("Delete this task?")) return;
+  const { error } = await sb.from("tasks").delete().eq("id", editing.id);
+  if (error) { $("#taskMsg").textContent = error.message; return; }
+  tasks = tasks.filter(x => x.id !== editing.id); render();
+  $("#taskDlg").close(); toast("Deleted");
+});
+
+/* ---------- Settings ---------- */
+const sf = $("#settingsForm");
+$("#settingsBtn").addEventListener("click", () => {
+  sf.full_name.value = me.full_name || "";
+  sf.telegram_chat_id.value = me.telegram_chat_id || "";
+  sf.summary_time.value = me.summary_time ? me.summary_time.slice(0, 5) : "";
+  sf.summary_workdays_only.checked = me.summary_workdays_only !== false;
+  sf.new_password.value = "";
+  $("#settingsDlg").showModal();
+});
+$("#closeSettings").addEventListener("click", () => $("#settingsDlg").close());
+
+async function saveSettings(silent) {
+  const chat = sf.telegram_chat_id.value.trim();
+  if (chat && !/^-?\d{4,}$/.test(chat)) { toast("Chat ID should be a number"); return false; }
+  const row = {
+    full_name: sf.full_name.value.trim() || null,
+    telegram_chat_id: chat || null,
+    summary_time: sf.summary_time.value || null,
+    summary_workdays_only: sf.summary_workdays_only.checked,
+  };
+  const { data, error } = await sb.from("profiles").update(row).eq("id", me.id).select().single();
+  if (error) { toast(error.message); return false; }
+  me = data; const i = profiles.findIndex(p => p.id === me.id); if (i >= 0) profiles[i] = me;
+  if (!silent) toast("Settings saved");
+  render();
+  return true;
+}
+sf.addEventListener("submit", async e => { e.preventDefault(); if (await saveSettings()) $("#settingsDlg").close(); });
+
+async function callFn(action, btn) {
+  if (!(await saveSettings(true))) return;
+  btn.disabled = true;
+  const { data, error } = await sb.functions.invoke("send-reminders", { body: { action } });
+  btn.disabled = false;
+  if (error) {
+    let msg = error.message;
+    try { const b = await error.context.json(); if (b?.error) msg = b.error; } catch {}
+    toast(msg); return;
+  }
+  toast(data?.ok ? "Sent — check Telegram" : (data?.error || "Something went wrong"));
+}
+$("#testBtn").addEventListener("click", e => callFn("test", e.target));
+$("#summaryBtn").addEventListener("click", e => callFn("summary_now", e.target));
+
+$("#pwBtn").addEventListener("click", async () => {
+  const p = sf.new_password.value;
+  if (p.length < 6) { toast("Use at least 6 characters"); return; }
+  const { error } = await sb.auth.updateUser({ password: p });
+  sf.new_password.value = "";
+  toast(error ? error.message : "Password changed");
+});
+$("#signOutBtn").addEventListener("click", async () => { $("#settingsDlg").close(); await sb.auth.signOut(); });
+$("#resetCfg").addEventListener("click", async () => {
+  if (!confirm("Disconnect from this Supabase project on this device?")) return;
+  try { await sb.auth.signOut(); } catch {}
+  store.del("tm_cfg"); location.reload();
+});
+
+boot().catch(err => { console.error(err); show("configScreen"); toast("Could not connect: " + err.message); });
+</script>
+</body>
+</html>
