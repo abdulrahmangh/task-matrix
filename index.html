@@ -40,8 +40,6 @@ label>input,label>select,label>textarea{margin-top:4px;color:var(--text);font-si
 .panel h1{margin:0 0 6px;font-size:22px}
 .panel .btn{width:100%;margin-top:4px}
 .msg{min-height:1.2em;font-size:13px;color:var(--danger);margin:10px 0 0}
-
-/* App shell */
 .top{position:sticky;top:0;z-index:5;background:var(--bg);padding:max(12px,env(safe-area-inset-top)) 16px 8px;display:flex;align-items:center;gap:10px}
 .brand{font-weight:700;font-size:18px;flex:1;display:flex;align-items:center;gap:8px}
 .logo{width:20px;height:20px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
@@ -56,7 +54,6 @@ label>input,label>select,label>textarea{margin-top:4px;color:var(--text);font-si
 .tog input{width:auto;margin:0}
 .searchwrap{padding:0 16px 12px}
 .searchwrap input{background:var(--surface)}
-
 .grid{display:grid;gap:12px;padding:0 16px 110px;grid-template-columns:1fr}
 @media (min-width:820px){.grid{grid-template-columns:1fr 1fr;max-width:1300px;margin:0 auto}}
 .quad{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
@@ -72,7 +69,6 @@ label>input,label>select,label>textarea{margin-top:4px;color:var(--text);font-si
 .q-schedule{--qc:var(--q-schedule);--qbg:var(--q-schedule-bg)}
 .q-delegate{--qc:var(--q-delegate);--qbg:var(--q-delegate-bg)}
 .q-later{--qc:var(--q-later);--qbg:var(--q-later-bg)}
-
 .card{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--qc);border-radius:10px;padding:10px;cursor:pointer;user-select:none}
 .card:hover{border-color:var(--qc)}
 .chk{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--qc);background:none;cursor:pointer;color:transparent;font-size:13px;font-weight:700;display:grid;place-items:center;margin-top:1px}
@@ -87,16 +83,13 @@ label>input,label>select,label>textarea{margin-top:4px;color:var(--text);font-si
 .av{width:22px;height:22px;border-radius:50%;background:var(--text);color:var(--bg);font-size:10px;font-weight:700;display:grid;place-items:center}
 .sortable-ghost{opacity:.35}
 .sortable-chosen{box-shadow:0 8px 24px rgba(0,0,0,.18)}
-
 .fab{position:fixed;right:20px;bottom:max(20px,env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:32px;line-height:1;box-shadow:0 6px 20px rgba(47,111,222,.45);cursor:pointer;z-index:6}
-
-/* Dialogs */
 dialog{border:0;padding:0;border-radius:16px;background:var(--surface);color:var(--text);width:min(560px,calc(100vw - 20px));max-height:calc(100vh - 20px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog::backdrop{background:rgba(10,12,16,.5)}
 dialog form{padding:20px}
 dialog h2{margin:0 0 14px;font-size:19px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media (max-width:420px){.row2{grid-template-columns:1fr}}
+@media (max-width:560px){.row2{grid-template-columns:1fr}}.row2>*{min-width:0}input[type=datetime-local],input[type=time]{-webkit-appearance:none;appearance:none;min-width:0;min-height:44px;display:block}
 .pri{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
 .chip{display:flex;align-items:center;gap:6px;margin:0;padding:8px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;color:var(--text);font-size:14px;font-weight:600}
 .chip input{width:auto;margin:0}
@@ -110,16 +103,12 @@ legend{padding:0 6px;font-size:13px;font-weight:600}
 .steps{font-size:13px;color:var(--muted);margin:0 0 12px;padding-left:18px}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 hr{border:0;border-top:1px solid var(--border);margin:16px 0}
-
 #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
 </style>
 </head>
 <body>
-
 <div id="boot" class="center muted">Loading…</div>
-
-<!-- One-time connection screen -->
 <section id="configScreen" class="center hidden">
   <form class="panel" id="configForm">
     <h1>Connect to Supabase</h1>
@@ -129,8 +118,6 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     <button class="btn primary">Save &amp; continue</button>
   </form>
 </section>
-
-<!-- Sign in -->
 <section id="authScreen" class="center hidden">
   <form class="panel" id="authForm">
     <h1>Task Matrix</h1>
@@ -142,8 +129,6 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     <button type="button" class="link" id="forgotBtn">Forgot password?</button>
   </form>
 </section>
-
-<!-- Main app -->
 <section id="app" class="hidden">
   <header class="top">
     <div class="brand">
@@ -165,22 +150,17 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
   <main class="grid" id="grid"></main>
   <button class="fab" id="addBtn" aria-label="Add task">+</button>
 </section>
-
 <datalist id="catList"></datalist>
-
-<!-- Task editor -->
 <dialog id="taskDlg">
   <form id="taskForm" novalidate>
     <h2 id="taskTitle">New task</h2>
     <label>Subject<input name="subject" required maxlength="300" placeholder="What needs to be done?"></label>
     <label>Remarks<textarea name="remarks" rows="3" placeholder="Details, references, notes…"></textarea></label>
-
     <div class="pri">
       <label class="chip"><input type="checkbox" name="important"> Important</label>
       <label class="chip"><input type="checkbox" name="urgent"> Urgent</label>
       <span class="qprev" id="qPrev"></span>
     </div>
-
     <div class="row2">
       <label>Category<input name="category" list="catList" placeholder="e.g. Due diligence"></label>
       <label>Status
@@ -195,7 +175,6 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
       <label>Due date<input type="datetime-local" name="due_date"></label>
       <label>Assign to<select name="assigned_to"></select></label>
     </div>
-
     <fieldset>
       <legend>🔔 Telegram reminder</legend>
       <div class="row2">
@@ -211,7 +190,6 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
       </div>
       <p class="hint">Goes to the assignee. Repeats until the task is marked done. Leave the time empty for no reminder.</p>
     </fieldset>
-
     <p class="msg" id="taskMsg"></p>
     <div class="actions">
       <button type="button" class="btn danger" id="delBtn">Delete</button>
@@ -221,32 +199,26 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     </div>
   </form>
 </dialog>
-
-<!-- Settings -->
 <dialog id="settingsDlg">
   <form id="settingsForm">
     <h2>Settings</h2>
     <label>Your name<input name="full_name" maxlength="80"></label>
-
     <label>Telegram chat ID<input name="telegram_chat_id" inputmode="numeric" placeholder="e.g. 123456789"></label>
     <ol class="steps">
       <li>Open the team's Telegram bot and press <b>Start</b>.</li>
       <li>Message <b>@userinfobot</b> on Telegram — it replies with your numeric ID.</li>
       <li>Paste it above, save, then tap “Send test”.</li>
     </ol>
-
     <div class="row2">
       <label>Daily summary time<input type="time" name="summary_time"></label>
       <label class="tog" style="margin-top:22px"><input type="checkbox" name="summary_workdays_only"> Workdays only</label>
     </div>
     <p class="hint">Riyadh time. Clear the time to turn the daily summary off.</p>
-
     <div class="btnrow">
       <button type="submit" class="btn primary">Save</button>
       <button type="button" class="btn" id="testBtn">Send test</button>
       <button type="button" class="btn" id="summaryBtn">Send summary now</button>
     </div>
-
     <hr>
     <label>New password<input type="password" name="new_password" autocomplete="new-password" placeholder="Leave empty to keep current"></label>
     <div class="btnrow">
@@ -257,16 +229,10 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     <button type="button" class="link" id="resetCfg">Change Supabase connection</button>
   </form>
 </dialog>
-
 <div id="toast"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script>
-/* ============================================================
-   OPTIONAL: hard-code your project here so teammates skip the
-   connection screen. Leave empty to enter them in the browser.
-   ============================================================ */
 const SUPABASE_URL = "https://arounjfjzyrgnvtmxgmc.supabase.co";
 const SUPABASE_KEY = "sb_publishable_P53Aaj-AQlWnW3gypGlLxg_Qyx35M6V";
 
@@ -318,7 +284,6 @@ const owner = t => t.assigned_to || t.created_by;
 const pName = id => { const p = profiles.find(x => x.id === id); return p ? (p.full_name || p.email || "?") : "?"; };
 const initials = id => pName(id).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
 
-/* ---------- Boot ---------- */
 function getCfg() {
   if (SUPABASE_URL && SUPABASE_KEY) return { url: SUPABASE_URL, key: SUPABASE_KEY };
   return store.get("tm_cfg");
@@ -363,7 +328,6 @@ $("#forgotBtn").addEventListener("click", async () => {
   $("#authMsg").textContent = error ? error.message : "Check your email for a reset link.";
 });
 
-/* ---------- Data ---------- */
 async function enterApp(user) {
   show("boot");
   await loadProfiles();
@@ -390,7 +354,6 @@ async function loadTasks() {
 let loadT;
 const debouncedLoad = () => { clearTimeout(loadT); loadT = setTimeout(loadTasks, 300); };
 
-/* ---------- Render ---------- */
 function buildGrid() {
   $("#grid").innerHTML = Object.entries(QUADS).map(([k, q]) => `
     <section class="quad q-${k}">
@@ -450,7 +413,6 @@ function render() {
     el.innerHTML = items.length ? items.map(card).join("") : `<div class="empty">Nothing here</div>`;
     $("#cnt-" + k).textContent = items.filter(t => t.status !== "done").length;
   }
-  // categories
   const cats = [...new Set([...DEFAULT_CATS, ...tasks.map(t => t.category).filter(Boolean)])].sort();
   $("#catList").innerHTML = cats.map(c => `<option value="${esc(c)}">`).join("");
   $("#catFilter").innerHTML = `<option value="">All categories</option>` +
@@ -459,7 +421,6 @@ function render() {
   $("#showDone").checked = filt.showDone;
 }
 
-/* ---------- Interactions ---------- */
 $("#grid").addEventListener("click", async e => {
   const add = e.target.closest(".qadd");
   if (add) return openTask(null, add.dataset.q);
@@ -497,7 +458,6 @@ $("#showDone").addEventListener("change", e => { filt.showDone = e.target.checke
 $("#search").addEventListener("input", e => { filt.q = e.target.value; render(); });
 $("#addBtn").addEventListener("click", () => openTask(null, "do"));
 
-/* ---------- Task dialog ---------- */
 const tf = $("#taskForm");
 function updateQPrev() {
   const k = quadOf(tf.important.checked, tf.urgent.checked);
@@ -570,7 +530,6 @@ $("#delBtn").addEventListener("click", async () => {
   $("#taskDlg").close(); toast("Deleted");
 });
 
-/* ---------- Settings ---------- */
 const sf = $("#settingsForm");
 $("#settingsBtn").addEventListener("click", () => {
   sf.full_name.value = me.full_name || "";
